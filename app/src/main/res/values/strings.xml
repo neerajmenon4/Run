@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Runner Route Planner</string>
+    
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_plan">Plan</string>
+    <string name="nav_history">History</string>
+    <string name="nav_profile">Profile</string>
+    
+    <!-- Home Screen -->
+    <string name="greeting_hi">Hi,</string>
+    <string name="greeting_run">RUN</string>
+    <string name="ready_to_push">READY TO PUSH?</string>
+    <string name="total_distance">TOTAL DISTANCE</string>
+    <string name="avg_speed">AVG SPEED</string>
+    <string name="speed_improvement">SPEED IMPROVEMENT</string>
+    <string name="import_from_garmin">IMPORT FROM GARMIN</string>
+    <string name="no_data_period">No data for this period</string>
+    
+    <!-- Time Periods -->
+    <string name="period_1week">1W</string>
+    <string name="period_1month">1M</string>
+    <string name="period_3months">3M</string>
+    
+    <!-- Routes Screen -->
+    <string name="routes_title">Saved Routes</string>
+    <string name="no_routes">No saved routes yet</string>
+    <string name="create_route">CREATE NEW ROUTE</string>
+    
+    <!-- History Screen -->
+    <string name="activities_title">Activity History</string>
+    <string name="no_activities">No activities yet</string>
+    
+    <!-- Import Screen -->
+    <string name="import_title">Import Activity</string>
+    <string name="select_file">SELECT FILE</string>
+    <string name="import_success">Activity imported successfully</string>
+    <string name="import_error">Failed to import file</string>
+    
+    <!-- Profile Screen -->
+    <string name="profile_title">Profile</string>
+    <string name="unit_system">Unit System</string>
+    <string name="metric">Metric</string>
+    <string name="imperial">Imperial</string>
+    <string name="theme">Theme</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    
+    <!-- Units -->
+    <string name="unit_km">KM</string>
+    <string name="unit_mi">MI</string>
+    <string name="unit_kmh">KM/H</string>
+    <string name="unit_mph">MPH</string>
+    <string name="unit_min_km">MIN/KM</string>
+    <string name="unit_min_mi">MIN/MI</string>
+    
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="settings">Settings</string>
+</resources>
