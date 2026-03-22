@@ -16,6 +16,7 @@ import com.kwyr.runnerplanner.ui.screens.plan.TrainingPlanScreen
 import com.kwyr.runnerplanner.ui.screens.history.GarminActivitiesScreen
 import com.kwyr.runnerplanner.ui.screens.profile.ProfileScreen
 import com.kwyr.runnerplanner.ui.screens.import_gpx.ImportGPXScreen
+import com.kwyr.runnerplanner.ui.screens.settings.SettingsScreen
 import com.kwyr.runnerplanner.util.Constants
 
 @Composable
@@ -30,12 +31,18 @@ fun AppNavGraph(
             BottomNavigation(
                 currentRoute = currentRoute,
                 onNavigate = { route ->
-                    navController.navigate(route) {
-                        popUpTo(Constants.Navigation.HOME) {
-                            saveState = true
+                    // If on Settings and clicking Profile, just pop back
+                    if (currentRoute == Constants.Navigation.SETTINGS && route == Constants.Navigation.PROFILE) {
+                        navController.popBackStack()
+                    } else {
+                        navController.navigate(route) {
+                            // Pop everything up to HOME to clear any nested screens
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 }
             )
@@ -68,7 +75,19 @@ fun AppNavGraph(
             }
             
             composable(Constants.Navigation.PROFILE) {
-                ProfileScreen()
+                ProfileScreen(
+                    onNavigateToSettings = {
+                        navController.navigate(Constants.Navigation.SETTINGS)
+                    }
+                )
+            }
+            
+            composable(Constants.Navigation.SETTINGS) {
+                SettingsScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
             }
             
             composable(Constants.Navigation.IMPORT_GPX) {

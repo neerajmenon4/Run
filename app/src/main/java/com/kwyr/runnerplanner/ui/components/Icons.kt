@@ -184,6 +184,33 @@ fun UploadIcon(modifier: Modifier = Modifier, color: Color = Color.Black) {
 }
 
 @Composable
+fun DownloadIcon(modifier: Modifier = Modifier, color: Color = Color.Black) {
+    Canvas(modifier = modifier.size(22.dp)) {
+        val scale = size.width / 24f
+        val path = Path().apply {
+            moveTo(21f * scale, 15f * scale)
+            lineTo(21f * scale, 19f * scale)
+            cubicTo(21f * scale, 19.5304f * scale, 20.7893f * scale, 20.0391f * scale, 20.4142f * scale, 20.4142f * scale)
+            cubicTo(20.0391f * scale, 20.7893f * scale, 19.5304f * scale, 21f * scale, 19f * scale, 21f * scale)
+            lineTo(5f * scale, 21f * scale)
+            cubicTo(4.46957f * scale, 21f * scale, 3.96086f * scale, 20.7893f * scale, 3.58579f * scale, 20.4142f * scale)
+            cubicTo(3.21071f * scale, 20.0391f * scale, 3f * scale, 19.5304f * scale, 3f * scale, 19f * scale)
+            lineTo(3f * scale, 15f * scale)
+            moveTo(7f * scale, 10f * scale)
+            lineTo(12f * scale, 15f * scale)
+            lineTo(17f * scale, 10f * scale)
+            moveTo(12f * scale, 15f * scale)
+            lineTo(12f * scale, 3f * scale)
+        }
+        drawPath(
+            path = path,
+            color = color,
+            style = Stroke(width = 2.5f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+        )
+    }
+}
+
+@Composable
 fun ChevronLeftIcon(modifier: Modifier = Modifier, color: Color = Color.Black) {
     Canvas(modifier = modifier.size(24.dp)) {
         val path = Path().apply {

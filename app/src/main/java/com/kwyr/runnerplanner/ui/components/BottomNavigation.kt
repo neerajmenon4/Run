@@ -51,15 +51,22 @@ fun BottomNavigation(
         )
 
         items.forEach { item ->
+            // Treat Settings as part of Profile tab
+            val isSelected = if (item.route == Constants.Navigation.PROFILE) {
+                currentRoute == Constants.Navigation.PROFILE || currentRoute == Constants.Navigation.SETTINGS
+            } else {
+                currentRoute == item.route
+            }
+            
             NavigationBarItem(
-                selected = currentRoute == item.route,
+                selected = isSelected,
                 onClick = { onNavigate(item.route) },
                 icon = {
                     when (item.iconContent) {
-                        "home" -> HomeIcon(color = if (currentRoute == item.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
-                        "plan" -> CalendarIcon(color = if (currentRoute == item.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
-                        "history" -> WatchIcon(color = if (currentRoute == item.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
-                        "profile" -> UserIcon(color = if (currentRoute == item.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
+                        "home" -> HomeIcon(color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
+                        "plan" -> CalendarIcon(color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
+                        "history" -> WatchIcon(color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
+                        "profile" -> UserIcon(color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(

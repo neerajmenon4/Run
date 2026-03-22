@@ -140,8 +140,12 @@ object TcxParser {
             val elevationGain = calculateElevationGain(trackpoints)
             val elevationLoss = calculateElevationLoss(trackpoints)
 
+            // Calculate average pace from total distance and duration (seconds per km)
+            val averagePace = if (totalDistance > 0 && totalDuration > 0) {
+                (totalDuration / totalDistance) * 1000.0
+            } else null
+            
             val paces = calculatePaces(trackpoints)
-            val averagePace = if (paces.isNotEmpty()) paces.average() else null
             val maxPace = paces.maxOrNull()
             val minPace = paces.minOrNull()
 

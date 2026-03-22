@@ -115,8 +115,36 @@ private fun ActivityCard(
     onDelete: () -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
     
-    val dateFormat = remember { SimpleDateFormat("MMM d, yyyy HH:mm", Locale.US) }
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text("Delete Activity?") },
+            text = { 
+                Text("Are you sure you want to delete \"${activity.name}\"? This action cannot be undone.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDelete()
+                        showDeleteConfirmation = false
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteConfirmation = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+    
+    val dateFormat = remember { SimpleDateFormat("MMM d, yyyy", Locale.US) }
     val formattedDate = remember(activity.startTime) {
         try {
             val date = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).parse(activity.startTime)
@@ -191,11 +219,20 @@ private fun ActivityCard(
                                 valueColor = androidx.compose.ui.graphics.Color(0xFFFF6B35)
                             )
                         }
+                        activity.averagePace?.let { pace ->
+                            val minutes = (pace / 60).toInt()
+                            val seconds = (pace % 60).toInt()
+                            MetricItem(
+                                label = "Avg Pace",
+                                value = "$minutes:${String.format("%02d", seconds)}/km",
+                                valueColor = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
 
                 IconButton(
-                    onClick = onDelete,
+                    onClick = { showDeleteConfirmation = true },
                     modifier = Modifier.size(48.dp)
                 ) {
                     Box(

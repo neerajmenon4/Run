@@ -23,6 +23,7 @@ import com.kwyr.runnerplanner.data.model.UnitSystem
 
 @Composable
 fun ProfileScreen(
+    onNavigateToSettings: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
@@ -158,6 +159,14 @@ fun ProfileScreen(
                 else -> stringResource(R.string.light)
             },
             onClick = { viewModel.toggleTheme() }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        SettingSection(
+            title = "Data Backup & Transfer",
+            description = "Export or import your data",
+            onClick = onNavigateToSettings
         )
     }
 }

@@ -19,5 +19,6 @@ object Constants {
         const val PROFILE = "profile"
         const val IMPORT_GPX = "import_gpx"
         const val DRAW_ROUTE = "draw_route"
+        const val SETTINGS = "settings"
     }
 }
