@@ -18,8 +18,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.graphics.Color
 import com.kwyr.runnerplanner.R
 import com.kwyr.runnerplanner.data.model.Activity
+import com.kwyr.runnerplanner.data.model.ActivityMode
 import com.kwyr.runnerplanner.data.model.UnitSystem
 import com.kwyr.runnerplanner.ui.components.ChevronLeftIcon
 import com.kwyr.runnerplanner.ui.components.TrashIcon
@@ -39,6 +41,8 @@ fun GarminActivitiesScreen(
     val availableMonths by viewModel.availableMonths.collectAsStateWithLifecycle()
     val weekStats by viewModel.weekStats.collectAsStateWithLifecycle()
     val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
+    val selectedMode by viewModel.selectedMode.collectAsStateWithLifecycle()
+    val accentColor = if (selectedMode == ActivityMode.BIKING) Color(0xFF009688) else Color(0xFFFF6B35)
     var expandedActivityId by remember { mutableStateOf<String?>(null) }
 
     Column(
@@ -78,6 +82,7 @@ fun GarminActivitiesScreen(
                     ActivityCard(
                         activity = activity,
                         unitSystem = userProfile.unitSystem,
+                        accentColor = accentColor,
                         onDelete = { viewModel.deleteActivity(activity.id) },
                         isExpanded = expandedActivityId == activity.id,
                         onToggleExpand = {
@@ -110,6 +115,7 @@ private fun TopBar() {
 private fun ActivityCard(
     activity: Activity,
     unitSystem: UnitSystem,
+    accentColor: Color,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
     onDelete: () -> Unit
@@ -216,7 +222,7 @@ private fun ActivityCard(
                             MetricItem(
                                 label = "Avg HR",
                                 value = "$hr bpm",
-                                valueColor = androidx.compose.ui.graphics.Color(0xFFFF6B35)
+                                valueColor = accentColor
                             )
                         }
                         activity.averagePace?.let { pace ->
@@ -276,7 +282,8 @@ private fun ActivityCard(
                                 duration = split.duration,
                                 pace = split.pace,
                                 heartRate = split.averageHeartRate,
-                                unitSystem = unitSystem
+                                unitSystem = unitSystem,
+                                accentColor = accentColor
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -314,7 +321,8 @@ private fun SplitItem(
     duration: Double,
     pace: Double,
     heartRate: Int?,
-    unitSystem: UnitSystem
+    unitSystem: UnitSystem,
+    accentColor: Color
 ) {
     val durationFormatted = remember(duration) {
         val minutes = (duration / 60).toInt()
@@ -386,7 +394,7 @@ private fun SplitItem(
                     Text(
                         text = "$hr",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = androidx.compose.ui.graphics.Color(0xFFFF6B35)
+                        color = accentColor
                     )
                 }
             }

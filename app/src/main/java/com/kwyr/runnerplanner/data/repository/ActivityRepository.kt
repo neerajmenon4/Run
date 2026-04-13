@@ -107,6 +107,34 @@ class ActivityRepository @Inject constructor(
         return activityDao.getTotalDurationForWeek(year, month, week) ?: 0.0
     }
 
+    // Type-filtered queries
+    fun getActivitiesByType(type: String): Flow<List<Activity>> {
+        return activityDao.getActivitiesByType(type)
+            .map { entities -> ActivityMapper.fromEntityList(entities) }
+    }
+
+    fun getActivitiesByWeekAndType(year: Int, month: Int, week: Int, type: String): Flow<List<Activity>> {
+        return activityDao.getActivitiesByWeekAndType(year, month, week, type)
+            .map { entities -> ActivityMapper.fromEntityList(entities) }
+    }
+
+    fun getDistinctYearsByType(type: String): Flow<List<Int>> {
+        return activityDao.getDistinctYearsByType(type)
+    }
+
+    fun getDistinctMonthsForYearByType(year: Int, type: String): Flow<List<Int>> {
+        return activityDao.getDistinctMonthsForYearByType(year, type)
+    }
+
+    fun getActivitiesByMonthAndType(year: Int, month: Int, type: String): Flow<List<Activity>> {
+        return activityDao.getActivitiesByMonthAndType(year, month, type)
+            .map { entities -> ActivityMapper.fromEntityList(entities) }
+    }
+
+    suspend fun getWeekCountForMonthByType(year: Int, month: Int, type: String): Int {
+        return activityDao.getWeekCountForMonthByType(year, month, type) ?: 0
+    }
+
     // Migration: Move activities from DataStore to Room (one-time operation)
     suspend fun migrateFromDataStore(): Result<Unit> {
         return try {

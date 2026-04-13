@@ -1,9 +1,11 @@
 package com.kwyr.runnerplanner.data.repository
 
 import com.kwyr.runnerplanner.data.local.PreferencesDataStore
+import com.kwyr.runnerplanner.data.model.ActivityMode
 import com.kwyr.runnerplanner.data.model.UserProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,6 +15,9 @@ class UserRepository @Inject constructor(
 ) {
     val userProfileFlow: Flow<UserProfile> = dataStore.userProfileFlow
     val themeFlow: Flow<String> = dataStore.themeFlow
+    val selectedModeFlow: Flow<ActivityMode> = dataStore.selectedModeFlow.map { modeStr ->
+        if (modeStr == "biking") ActivityMode.BIKING else ActivityMode.RUNNING
+    }
 
     suspend fun getUserProfile(): Result<UserProfile> {
         return try {
@@ -44,6 +49,15 @@ class UserRepository @Inject constructor(
     suspend fun saveTheme(theme: String): Result<Unit> {
         return try {
             dataStore.saveTheme(theme)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun saveActivityMode(mode: ActivityMode): Result<Unit> {
+        return try {
+            dataStore.saveSelectedMode(mode.type)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

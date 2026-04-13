@@ -70,4 +70,23 @@ interface ActivityDao {
     // Get total duration for a week
     @Query("SELECT SUM(totalDuration) FROM activities WHERE year = :year AND month = :month AND weekOfMonth = :week")
     suspend fun getTotalDurationForWeek(year: Int, month: Int, week: Int): Double?
+
+    // Type-filtered queries for mode-aware screens
+    @Query("SELECT * FROM activities WHERE type = :type ORDER BY timestamp DESC")
+    fun getActivitiesByType(type: String): Flow<List<ActivityEntity>>
+
+    @Query("SELECT * FROM activities WHERE year = :year AND month = :month AND weekOfMonth = :week AND type = :type ORDER BY timestamp DESC")
+    fun getActivitiesByWeekAndType(year: Int, month: Int, week: Int, type: String): Flow<List<ActivityEntity>>
+
+    @Query("SELECT DISTINCT year FROM activities WHERE type = :type ORDER BY year DESC")
+    fun getDistinctYearsByType(type: String): Flow<List<Int>>
+
+    @Query("SELECT DISTINCT month FROM activities WHERE year = :year AND type = :type ORDER BY month DESC")
+    fun getDistinctMonthsForYearByType(year: Int, type: String): Flow<List<Int>>
+
+    @Query("SELECT * FROM activities WHERE year = :year AND month = :month AND type = :type ORDER BY timestamp DESC")
+    fun getActivitiesByMonthAndType(year: Int, month: Int, type: String): Flow<List<ActivityEntity>>
+
+    @Query("SELECT MAX(weekOfMonth) FROM activities WHERE year = :year AND month = :month AND type = :type")
+    suspend fun getWeekCountForMonthByType(year: Int, month: Int, type: String): Int?
 }

@@ -18,7 +18,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.graphics.Color
 import com.kwyr.runnerplanner.R
+import com.kwyr.runnerplanner.data.model.ActivityMode
 import com.kwyr.runnerplanner.data.model.UnitSystem
 
 @Composable
@@ -26,8 +28,10 @@ fun ProfileScreen(
     onNavigateToSettings: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
-    val theme by viewModel.theme.collectAsStateWithLifecycle()
+    val userProfile  by viewModel.userProfile.collectAsStateWithLifecycle()
+    val theme        by viewModel.theme.collectAsStateWithLifecycle()
+    val selectedMode by viewModel.selectedMode.collectAsStateWithLifecycle()
+    val accentColor  = if (selectedMode == ActivityMode.BIKING) Color(0xFF009688) else Color(0xFFFF6B35)
     var isEditingName by remember { mutableStateOf(false) }
     var nameText by remember(userProfile.name) { mutableStateOf(userProfile.name) }
     val focusManager = LocalFocusManager.current
@@ -121,10 +125,7 @@ fun ProfileScreen(
                             color = MaterialTheme.colorScheme.primary
                         )
                         TextButton(onClick = { isEditingName = true }) {
-                            Text(
-                                "Edit",
-                                color = androidx.compose.ui.graphics.Color(0xFFFF6B35)
-                            )
+                            Text("Edit", color = accentColor)
                         }
                     }
                 }

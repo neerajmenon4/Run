@@ -38,6 +38,7 @@ class PreferencesDataStore @Inject constructor(
         val THEME = stringPreferencesKey(Constants.PreferenceKeys.THEME)
         val TRAINING_PLAN = stringPreferencesKey(Constants.PreferenceKeys.TRAINING_PLAN)
         val WEEK_PLANS = stringPreferencesKey(Constants.PreferenceKeys.WEEK_PLANS)
+        val SELECTED_MODE = stringPreferencesKey(Constants.PreferenceKeys.SELECTED_MODE)
     }
 
     val routesFlow: Flow<List<Route>> = dataStore.data.map { preferences ->
@@ -133,6 +134,16 @@ class PreferencesDataStore @Inject constructor(
     suspend fun saveWeekPlans(weekPlans: Map<String, WeekPlan>) {
         dataStore.edit { preferences ->
             preferences[Keys.WEEK_PLANS] = gson.toJson(weekPlans)
+        }
+    }
+
+    val selectedModeFlow: Flow<String> = dataStore.data.map { preferences ->
+        preferences[Keys.SELECTED_MODE] ?: "running"
+    }
+
+    suspend fun saveSelectedMode(mode: String) {
+        dataStore.edit { preferences ->
+            preferences[Keys.SELECTED_MODE] = mode
         }
     }
 }

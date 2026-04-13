@@ -4,9 +4,10 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kwyr.runnerplanner.data.model.Activity
+import com.kwyr.runnerplanner.data.model.ActivityMode
 import com.kwyr.runnerplanner.data.model.UnitSystem
-import com.kwyr.runnerplanner.data.parser.TcxParser
 import com.kwyr.runnerplanner.data.parser.GpxParser
+import com.kwyr.runnerplanner.data.parser.TcxParser
 import com.kwyr.runnerplanner.data.repository.ActivityRepository
 import com.kwyr.runnerplanner.data.repository.UserRepository
 import com.kwyr.runnerplanner.ui.screens.import_gpx.ImportState
@@ -29,6 +30,7 @@ enum class TimePeriod {
 }
 
 data class HomeUiState(
+    val selectedMode: ActivityMode = ActivityMode.RUNNING,
     val userName: String = "Runner",
     val unitSystem: UnitSystem = UnitSystem.METRIC,
     val activities: List<Activity> = emptyList(),
@@ -55,19 +57,21 @@ class HomeViewModel @Inject constructor(
         loadData()
     }
 
+    fun setMode(mode: ActivityMode) {
+        viewModelScope.launch {
+            userRepository.saveActivityMode(mode)
+        }
+    }
+
     fun parseFile(uri: Uri, content: String, fileName: String) {
         viewModelScope.launch {
             _importState.value = ImportState.Loading
-
             try {
-                val activity = when {
-                    fileName.endsWith(".tcx", ignoreCase = true) -> {
-                        TcxParser.parseTcx(content)
-                    }
-                    fileName.endsWith(".gpx", ignoreCase = true) -> {
-                        val gpxTrack = GpxParser.parseGpx(content)
-                        null
-                    }
+                val currentMode = _uiState.value.selectedMode
+                val activity: Activity? = when {
+                    fileName.endsWith(".tcx", ignoreCase = true) -> TcxParser.parseTcx(content)
+                    fileName.endsWith(".gpx", ignoreCase = true) && currentMode == ActivityMode.BIKING ->
+                        GpxParser.convertToActivity(content)
                     else -> null
                 }
 
@@ -75,7 +79,12 @@ class HomeViewModel @Inject constructor(
                     activityRepository.saveActivity(activity)
                     _importState.value = ImportState.Success(activity)
                 } else {
-                    _importState.value = ImportState.Error("Failed to parse file")
+                    val msg = if (fileName.endsWith(".gpx", ignoreCase = true) && currentMode == ActivityMode.RUNNING) {
+                        "Switch to Bike mode to import GPX files"
+                    } else {
+                        "Failed to parse file"
+                    }
+                    _importState.value = ImportState.Error(msg)
                 }
             } catch (e: Exception) {
                 _importState.value = ImportState.Error(e.message ?: "Unknown error")
@@ -91,18 +100,21 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 activityRepository.activitiesFlow,
-                userRepository.userProfileFlow
-            ) { activities, profile ->
-                val totalDist = activities.sumOf { it.totalDistance }
-                val totalSeconds = activities.sumOf { it.totalDuration }
+                userRepository.userProfileFlow,
+                userRepository.selectedModeFlow
+            ) { activities, profile, mode ->
+                val filtered = activities.filter { it.type == mode.type }
+                val totalDist = filtered.sumOf { it.totalDistance }
+                val totalSeconds = filtered.sumOf { it.totalDuration }
                 val totalKm = totalDist / 1000.0
                 val totalHours = totalSeconds / 3600.0
                 val avgSpd = if (totalHours > 0) totalKm / totalHours else 0.0
 
                 _uiState.value.copy(
+                    selectedMode = mode,
                     userName = profile.name,
                     unitSystem = profile.unitSystem,
-                    activities = activities,
+                    activities = filtered,
                     totalDistance = totalDist,
                     avgSpeed = avgSpd,
                     isLoading = false

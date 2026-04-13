@@ -1,7 +1,7 @@
 package com.kwyr.runnerplanner.data.model
 
 data class BackupData(
-    val version: Int = 1,
+    val version: Int = 2,
     val exportDate: String,
     val appVersion: String,
     val routes: List<Route>,

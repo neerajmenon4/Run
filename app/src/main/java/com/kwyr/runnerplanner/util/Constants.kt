@@ -10,6 +10,7 @@ object Constants {
         const val THEME = "theme"
         const val TRAINING_PLAN = "training_plan"
         const val WEEK_PLANS = "week_plans"
+        const val SELECTED_MODE = "selected_mode"
     }
     
     object Navigation {

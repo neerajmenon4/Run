@@ -7,6 +7,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
@@ -29,11 +31,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kwyr.runnerplanner.R
-import com.kwyr.runnerplanner.ui.components.SettingsIcon
+import com.kwyr.runnerplanner.data.model.ActivityMode
 import com.kwyr.runnerplanner.ui.components.UploadIcon
 import com.kwyr.runnerplanner.util.UnitConversion
 import java.text.SimpleDateFormat
 import java.util.*
+
+private val ACCENT_RUN  = Color(0xFFFF6B35)
+private val ACCENT_BIKE = Color(0xFF009688)
 
 @Composable
 fun HomeScreen(
@@ -95,26 +100,34 @@ fun HomeScreen(
                 .padding(horizontal = 20.dp)
                 .padding(top = 16.dp, bottom = 100.dp)
         ) {
-        Header(userName = uiState.userName)
-        
+        val accentColor = if (uiState.selectedMode == ActivityMode.BIKING) ACCENT_BIKE else ACCENT_RUN
+
+        Header(
+            userName     = uiState.userName,
+            selectedMode = uiState.selectedMode,
+            accentColor  = accentColor,
+            onModeChange = { viewModel.setMode(it) }
+        )
+
         Spacer(modifier = Modifier.height(32.dp))
-        
+
         TimeSection()
-        
+
         Spacer(modifier = Modifier.height(40.dp))
-        
+
         StatsRow(
             totalDistance = uiState.totalDistance,
-            avgSpeed = uiState.avgSpeed,
-            unitSystem = uiState.unitSystem
+            avgSpeed      = uiState.avgSpeed,
+            unitSystem    = uiState.unitSystem
         )
-        
+
         Spacer(modifier = Modifier.height(32.dp))
-        
+
         SpeedChart(
-            speedData = uiState.speedData,
-            timePeriod = uiState.timePeriod,
-            unitSystem = uiState.unitSystem,
+            speedData          = uiState.speedData,
+            timePeriod         = uiState.timePeriod,
+            unitSystem         = uiState.unitSystem,
+            accentColor        = accentColor,
             onTimePeriodChange = { viewModel.setTimePeriod(it) }
         )
         
@@ -128,7 +141,8 @@ fun HomeScreen(
                 }
                 filePickerLauncher.launch(intent)
             },
-            isLoading = importState is com.kwyr.runnerplanner.ui.screens.import_gpx.ImportState.Loading
+            isLoading = importState is com.kwyr.runnerplanner.ui.screens.import_gpx.ImportState.Loading,
+            isBikeMode = uiState.selectedMode == ActivityMode.BIKING
         )
         }
         
@@ -157,28 +171,68 @@ fun HomeScreen(
 }
 
 @Composable
-private fun Header(userName: String) {
+private fun Header(
+    userName: String,
+    selectedMode: ActivityMode,
+    accentColor: Color,
+    onModeChange: (ActivityMode) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 16.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = stringResource(R.string.greeting_hi),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.tertiary
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = userName,
-                style = MaterialTheme.typography.headlineSmall,
-                color = androidx.compose.ui.graphics.Color(0xFFFF6B35)
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text  = stringResource(R.string.greeting_hi),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text  = userName,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = accentColor
+                )
+            }
+
+            // RUN / BIKE mode toggle — no ripple effect
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Row(modifier = Modifier.padding(4.dp)) {
+                    ActivityMode.values().forEach { mode ->
+                        val isSelected = selectedMode == mode
+                        val pillColor  = if (mode == ActivityMode.BIKING) ACCENT_BIKE else ACCENT_RUN
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = if (isSelected) pillColor else Color.Transparent,
+                            modifier = Modifier.clickable(
+                                indication        = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) { onModeChange(mode) }
+                        ) {
+                            Text(
+                                text  = if (mode == ActivityMode.RUNNING) "RUN" else "BIKE",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = if (isSelected) Color.White else MaterialTheme.colorScheme.tertiary,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
+
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = stringResource(R.string.greeting_run),
+            text  = if (selectedMode == ActivityMode.BIKING) "RIDE" else stringResource(R.string.greeting_run),
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -276,6 +330,7 @@ private fun SpeedChart(
     speedData: List<SpeedDataPoint>,
     timePeriod: TimePeriod,
     unitSystem: com.kwyr.runnerplanner.data.model.UnitSystem,
+    accentColor: Color,
     onTimePeriodChange: (TimePeriod) -> Unit
 ) {
     Column {
@@ -325,7 +380,7 @@ private fun SpeedChart(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 } else {
-                    SpeedLineChart(speedData = speedData, unitSystem = unitSystem)
+                    SpeedLineChart(speedData = speedData, unitSystem = unitSystem, accentColor = accentColor)
                 }
             }
         }
@@ -335,7 +390,8 @@ private fun SpeedChart(
 @Composable
 private fun SpeedLineChart(
     speedData: List<SpeedDataPoint>,
-    unitSystem: com.kwyr.runnerplanner.data.model.UnitSystem
+    unitSystem: com.kwyr.runnerplanner.data.model.UnitSystem,
+    accentColor: Color
 ) {
     var chartWidth by remember { mutableStateOf(0f) }
     var hoveredIndex by remember { mutableStateOf<Int?>(null) }
@@ -381,17 +437,17 @@ private fun SpeedLineChart(
             }
             
             drawPath(
-                path = path,
-                color = androidx.compose.ui.graphics.Color(0xFFFF8C42),
+                path  = path,
+                color = accentColor,
                 style = Stroke(width = 4f, cap = StrokeCap.Round, join = StrokeJoin.Round)
             )
-            
+
             speedData.forEachIndexed { index, point ->
                 val x = (index.toFloat() / (speedData.size - 1).coerceAtLeast(1)) * width
                 val y = height - (point.speed / maxSpeed * height).toFloat()
-                
+
                 drawCircle(
-                    color = androidx.compose.ui.graphics.Color(0xFFFF8C42),
+                    color  = accentColor,
                     radius = 6f,
                     center = Offset(x, y)
                 )
@@ -467,7 +523,7 @@ private fun SuccessNotification(
 }
 
 @Composable
-private fun ImportButton(onClick: () -> Unit, isLoading: Boolean = false) {
+private fun ImportButton(onClick: () -> Unit, isLoading: Boolean = false, isBikeMode: Boolean = false) {
     Button(
         onClick = onClick,
         enabled = !isLoading,
@@ -492,7 +548,7 @@ private fun ImportButton(onClick: () -> Unit, isLoading: Boolean = false) {
             ) {
                 UploadIcon(color = MaterialTheme.colorScheme.onPrimary)
                 Text(
-                    text = stringResource(R.string.import_from_garmin),
+                    text = if (isBikeMode) "IMPORT GPX RIDE" else stringResource(R.string.import_from_garmin),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onPrimary
                 )

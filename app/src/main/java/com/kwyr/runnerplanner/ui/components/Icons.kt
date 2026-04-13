@@ -298,6 +298,51 @@ fun CalendarIcon(modifier: Modifier = Modifier, color: Color = Color.Black) {
 }
 
 @Composable
+fun BikeIcon(modifier: Modifier = Modifier, color: Color = Color.Black) {
+    Canvas(modifier = modifier.size(24.dp)) {
+        val scale = size.width / 24f
+        // Rear wheel
+        drawCircle(
+            color = color,
+            radius = 4f * scale,
+            center = Offset(5.5f * scale, 16f * scale),
+            style = Stroke(width = 2f)
+        )
+        // Front wheel
+        drawCircle(
+            color = color,
+            radius = 4f * scale,
+            center = Offset(18.5f * scale, 16f * scale),
+            style = Stroke(width = 2f)
+        )
+        // Frame
+        val framePath = Path().apply {
+            // Seat tube: seat to bottom bracket
+            moveTo(9f * scale, 7f * scale)
+            lineTo(9f * scale, 16f * scale)
+            // Chain stay: BB to rear wheel
+            lineTo(5.5f * scale, 16f * scale)
+            // Seat stay: seat to rear wheel
+            moveTo(9f * scale, 7f * scale)
+            lineTo(5.5f * scale, 16f * scale)
+            // Top tube + down tube: seat to head tube
+            moveTo(9f * scale, 7f * scale)
+            lineTo(14f * scale, 7f * scale)
+            // Down tube: head to BB
+            lineTo(9f * scale, 16f * scale)
+            // Fork: head to front wheel
+            moveTo(14f * scale, 7f * scale)
+            lineTo(18.5f * scale, 16f * scale)
+        }
+        drawPath(framePath, color = color, style = Stroke(width = 2f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+        // Handlebar
+        drawLine(color = color, start = Offset(14f * scale, 7f * scale), end = Offset(16f * scale, 5f * scale), strokeWidth = 2f, cap = StrokeCap.Round)
+        // Saddle
+        drawLine(color = color, start = Offset(7.5f * scale, 7f * scale), end = Offset(10.5f * scale, 7f * scale), strokeWidth = 2f, cap = StrokeCap.Round)
+    }
+}
+
+@Composable
 fun TrashIcon(modifier: Modifier = Modifier, color: Color = Color.Black) {
     Canvas(modifier = modifier.size(24.dp)) {
         val scale = size.width / 24f

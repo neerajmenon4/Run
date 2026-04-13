@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.res.Configuration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kwyr.runnerplanner.data.model.ActivityMode
 import com.kwyr.runnerplanner.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -37,9 +38,22 @@ class MainViewModel @Inject constructor(
             initialValue = false
         )
 
+    val selectedMode: StateFlow<ActivityMode> = userRepository.selectedModeFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ActivityMode.RUNNING
+        )
+
     fun toggleTheme() {
         viewModelScope.launch {
             userRepository.toggleTheme()
+        }
+    }
+
+    fun setActivityMode(mode: ActivityMode) {
+        viewModelScope.launch {
+            userRepository.saveActivityMode(mode)
         }
     }
 }
